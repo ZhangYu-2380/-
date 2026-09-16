@@ -41,6 +41,17 @@ jobs:
       - name: Build static site
         run: pnpm run build
 
+      # GitHub Pages maps /<repository>/ to the artifact root. Vinext writes
+      # prefixed static assets under that repository directory, so flatten the
+      # assets while retaining their public /<repository> URLs.
+      - name: Normalize static asset paths for Pages
+        run: |
+          repository="${GITHUB_REPOSITORY#*/}"
+          if [ -d "dist/client/${repository}/_next" ]; then
+            mv "dist/client/${repository}/_next" "dist/client/_next"
+            rmdir "dist/client/${repository}"
+          fi
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
