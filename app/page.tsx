@@ -1,6 +1,7 @@
-import { MonitorDashboard } from "@/components/monitor-dashboard";
+import { DashboardShell } from "@/components/dashboard-shell";
 import { createDashboardData } from "@/lib/mock-data";
 
 export default function Home() {
-  return <MonitorDashboard data={createDashboardData()} />;
+  return <DashboardShell data={createDashboardData()} />;
 }
+
