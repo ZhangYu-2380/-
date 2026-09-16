@@ -94,6 +94,7 @@ export function MonitorDashboard({ data }: { data: DashboardData }) {
           </p>
         </div>
         <div className="top-actions">
+          <a className="flow-screen-link" href="?screen=alerts">进入系统告警监控 →</a>
           <div className="metrics" aria-label="流程汇总">
             <Metric label="小流程总数" value={data.total} />
             <Metric label="异常" value={data.error} />
@@ -309,3 +310,4 @@ function OperationDetail({
     </div>
   );
 }
+
