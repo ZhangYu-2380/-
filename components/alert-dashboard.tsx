@@ -59,7 +59,7 @@ export function AlertDashboard() {
             </button>
           ))}
         </div>
-        <a className="flow-screen-link" href="../">进入流程监控大屏 →</a>
+        <a className="flow-screen-link" href="?screen=flow">进入流程监控大屏 →</a>
       </section>
 
       <section className="alert-workspace">
