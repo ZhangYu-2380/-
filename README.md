@@ -6,7 +6,7 @@
 
 GitHub Pages 演示地址：
 
-[https://zhangyu-2380.github.io/-/](https://zhangyu-2380.github.io/-/)
+[https://zhangyu-2380.github.io/zy/](https://zhangyu-2380.github.io/zy/)
 
 > 当前版本使用模拟数据，仅用于界面与流程监控演示；请勿提交真实生产数据、账号、密码或密钥。
 
