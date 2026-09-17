@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import { isAlarmSoundEnabled, playAlarmSound, setAlarmSoundEnabled } from "@/lib/alarm-audio";
 
 type Level = "紧急" | "严重" | "警告" | "提示";
 
@@ -33,35 +35,22 @@ export function AlertDashboard() {
   const [level, setLevel] = useState<Level | "全部">("全部");
   const [selectedId, setSelectedId] = useState(alerts[0].id);
   const [soundEnabled, setSoundEnabled] = useState(false);
-  const audioContextRef = useRef<AudioContext | null>(null);
+  const previousAlarmCountRef = useRef<number | null>(null);
   const visibleAlerts = useMemo(() => level === "全部" ? alerts : alerts.filter((alert) => alert.level === level), [level]);
   const selected = alerts.find((alert) => alert.id === selectedId) ?? visibleAlerts[0];
   const active = alerts.filter((alert) => alert.status !== "已恢复").length;
+  const alarmCount = alerts.filter((alert) => (alert.level === "紧急" || alert.level === "严重") && alert.status !== "已恢复").length;
 
-  const playAlarm = useCallback(async () => {
-    const AudioContextClass = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AudioContextClass) return;
-    const context = audioContextRef.current ?? new AudioContextClass();
-    audioContextRef.current = context;
-    await context.resume();
-
-    [0, 0.32, 0.64].forEach((offset, index) => {
-      const oscillator = context.createOscillator();
-      const gain = context.createGain();
-      oscillator.type = "square";
-      oscillator.frequency.setValueAtTime(index % 2 === 0 ? 880 : 660, context.currentTime + offset);
-      gain.gain.setValueAtTime(0.0001, context.currentTime + offset);
-      gain.gain.exponentialRampToValueAtTime(0.16, context.currentTime + offset + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + offset + 0.25);
-      oscillator.connect(gain).connect(context.destination);
-      oscillator.start(context.currentTime + offset);
-      oscillator.stop(context.currentTime + offset + 0.26);
-    });
-  }, []);
+  useEffect(() => setSoundEnabled(isAlarmSoundEnabled()), []);
+  useEffect(() => {
+    if (previousAlarmCountRef.current !== null && alarmCount > previousAlarmCountRef.current && soundEnabled) void playAlarmSound();
+    previousAlarmCountRef.current = alarmCount;
+  }, [alarmCount, soundEnabled]);
 
   const enableSound = async () => {
+    setAlarmSoundEnabled(true);
     setSoundEnabled(true);
-    await playAlarm();
+    await playAlarmSound();
   };
 
   return (
@@ -91,7 +80,7 @@ export function AlertDashboard() {
           <button className={`sound-button ${soundEnabled ? "enabled" : ""}`} type="button" aria-pressed={soundEnabled} onClick={enableSound}>
             {soundEnabled ? "🔊 声音已开启" : "🔇 开启告警声音"}
           </button>
-          <button className="sound-button test" type="button" onClick={playAlarm}>测试警报音</button>
+          <button className="sound-button test" type="button" onClick={playAlarmSound}>测试警报音</button>
           <a className="flow-screen-link" href="?screen=flow">进入流程监控大屏 →</a>
         </div>
       </section>
