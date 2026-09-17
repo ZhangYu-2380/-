@@ -48,6 +48,11 @@ export function MonitorDashboard({ data }: { data: DashboardData }) {
     setHint("");
   }
 
+  function selectFlow(flow: SmallFlow) {
+    const operation = flow.operations.find((item) => item.status === "error" || item.status === "timeout" || item.status === "running") ?? flow.operations[0];
+    selectOperation(flow, operation);
+  }
+
   useEffect(() => {
     const context = (document as Document & {
       modelContext?: { registerTool: (tool: unknown, options: { signal: AbortSignal }) => void | Promise<void> };
@@ -187,39 +192,27 @@ export function MonitorDashboard({ data }: { data: DashboardData }) {
                   </p>
                 </header>
 
-                <div className="small-list" key={String(problemOnly)} role="region" aria-label={`${group.name}小流程列表`} tabIndex={0}>
+                <div className="small-list" key={String(problemOnly)} role="region" aria-label={`${group.name}小流程状态矩阵`} tabIndex={0}>
                   {flows.length ? (
-                    flows.map((flow) => (
-                      <div className="small-row" key={flow.id}>
-                        <span className="small-name" title={flow.name}>
-                          {flow.name}
-                        </span>
-                        <div className="operations">
-                          {flow.operations.map((operation) => {
-                            const operationKey = `${flow.id}:${operation.index}`;
-                            return (
-                              <button
-                                className={`operation-block status-${operation.status}`}
-                                type="button"
-                                key={operation.index}
-                                data-selected={selectedKey === operationKey}
-                                title={`${operation.name} · ${STATUS_TEXT[operation.status]}`}
-                                aria-label={`${flow.name}，操作 ${String(operation.index + 1).padStart(2, "0")} ${operation.name}，${STATUS_TEXT[operation.status]}`}
-                                onClick={() => selectOperation(flow, operation)}
-                              >
-                                {String(operation.index + 1).padStart(2, "0")}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))
+                    <div className="flow-tile-grid">
+                      {flows.map((flow) => (
+                        <button
+                          className={`flow-tile status-${flow.overall}`}
+                          type="button"
+                          key={flow.id}
+                          data-selected={selected?.flow.id === flow.id}
+                          title={`${flow.name} · ${STATUS_TEXT[flow.overall]}`}
+                          aria-label={`${flow.name}，${STATUS_TEXT[flow.overall]}，点击查看详情`}
+                          onClick={() => selectFlow(flow)}
+                        />
+                      ))}
+                    </div>
                   ) : (
                     <p className="empty-row">当前筛选下无异常/超时小流程</p>
                   )}
                 </div>
                 <p className="more-text">
-                  已载入 {flows.length} / {visibleTotal} 条 · 异常优先
+                  已显示 {flows.length} / {visibleTotal} 条小流程 · 点击色块查看详情
                 </p>
               </section>
             );
