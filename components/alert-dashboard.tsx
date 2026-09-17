@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { isAlarmSoundEnabled, playAlarmSound, setAlarmSoundEnabled } from "@/lib/alarm-audio";
+import { isAlarmSoundEnabled, playAlarmSound, setAlarmSoundEnabled, stopAlarmSound } from "@/lib/alarm-audio";
 
 type Level = "紧急" | "严重" | "警告" | "提示";
 
@@ -47,7 +47,13 @@ export function AlertDashboard() {
     previousAlarmCountRef.current = alarmCount;
   }, [alarmCount, soundEnabled]);
 
-  const enableSound = async () => {
+  const toggleSound = async () => {
+    if (soundEnabled) {
+      setAlarmSoundEnabled(false);
+      setSoundEnabled(false);
+      await stopAlarmSound();
+      return;
+    }
     setAlarmSoundEnabled(true);
     setSoundEnabled(true);
     await playAlarmSound();
@@ -77,8 +83,8 @@ export function AlertDashboard() {
           ))}
         </div>
         <div className="alert-toolbar-actions">
-          <button className={`sound-button ${soundEnabled ? "enabled" : ""}`} type="button" aria-pressed={soundEnabled} onClick={enableSound}>
-            {soundEnabled ? "🔊 声音已开启" : "🔇 开启告警声音"}
+          <button className={`sound-button ${soundEnabled ? "enabled" : ""}`} type="button" aria-pressed={soundEnabled} onClick={toggleSound}>
+            {soundEnabled ? "🔊 关闭告警声音" : "🔇 开启告警声音"}
           </button>
           <button className="sound-button test" type="button" onClick={playAlarmSound}>测试警报音</button>
           <a className="flow-screen-link" href="?screen=flow">进入流程监控大屏 →</a>
