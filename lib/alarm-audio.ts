@@ -29,3 +29,9 @@ export async function playAlarmSound() {
   });
 }
 
+export async function stopAlarmSound() {
+  if (!audioContext) return;
+  await audioContext.close();
+  audioContext = null;
+}
+
