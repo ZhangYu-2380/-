@@ -218,10 +218,14 @@ class Handler(BaseHTTPRequestHandler):
         self.send_file(target)
 
 
-if __name__ == "__main__":
+def run() -> None:
     if PASSWORD == "demo123" or SECRET_KEY == "change-me-in-production":
         print("警告：当前为演示凭据；接入真实数据前必须设置 MONITOR_PASSWORD 和 MONITOR_SECRET_KEY。")
     print(f"监控服务：http://{HOST}:{PORT}")
     print("流程接口：/api/dashboard，告警接口：/api/alerts，健康检查：/api/health")
     ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()
+
+
+if __name__ == "__main__":
+    run()
 
