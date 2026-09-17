@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 
+import { isAlarmSoundEnabled, playAlarmSound, setAlarmSoundEnabled } from "@/lib/alarm-audio";
 import { Button } from "@/components/ui/button";
 import {
   DashboardData,
@@ -27,6 +28,9 @@ const LEGEND: Array<{ status: FlowStatus; label: string }> = [
 
 export function MonitorDashboard({ data }: { data: DashboardData }) {
   const [problemOnly, setProblemOnly] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const previousProblemCountRef = useRef<number | null>(null);
+  const problemCount = data.error + data.timeout;
   const [selected, setSelected] = useState<SelectedOperation | null>(null);
   const [hint, setHint] = useState("");
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
@@ -84,6 +88,18 @@ export function MonitorDashboard({ data }: { data: DashboardData }) {
     return () => lifecycle.abort();
   }, [data, problemOnly]);
 
+  useEffect(() => setSoundEnabled(isAlarmSoundEnabled()), []);
+  useEffect(() => {
+    if (previousProblemCountRef.current !== null && problemCount > previousProblemCountRef.current && soundEnabled) void playAlarmSound();
+    previousProblemCountRef.current = problemCount;
+  }, [problemCount, soundEnabled]);
+
+  const enableSound = async () => {
+    setAlarmSoundEnabled(true);
+    setSoundEnabled(true);
+    await playAlarmSound();
+  };
+
   return (
     <main className="monitor-page">
       <header className="monitor-top">
@@ -94,6 +110,10 @@ export function MonitorDashboard({ data }: { data: DashboardData }) {
           </p>
         </div>
         <div className="top-actions">
+          <button className={`sound-button ${soundEnabled ? "enabled" : ""}`} type="button" aria-pressed={soundEnabled} onClick={enableSound}>
+            {soundEnabled ? "🔊 声音已开启" : "🔇 开启告警声音"}
+          </button>
+          <button className="sound-button test" type="button" onClick={playAlarmSound}>测试警报音</button>
           <a className="flow-screen-link" href="?screen=alerts">进入系统告警监控 →</a>
           <div className="metrics" aria-label="流程汇总">
             <Metric label="小流程总数" value={data.total} />
