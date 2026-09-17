@@ -116,10 +116,9 @@ export function createDashboardData(): DashboardData {
     return {
       index: bigIndex,
       ...definition,
-      all: rows.slice(0, 12),
+      all: rows,
       problems: rows
-        .filter((flow) => flow.overall === "error" || flow.overall === "timeout")
-        .slice(0, 12),
+        .filter((flow) => flow.overall === "error" || flow.overall === "timeout"),
     };
   });
 
@@ -132,3 +131,4 @@ export function createDashboardData(): DashboardData {
     groups,
   };
 }
+
