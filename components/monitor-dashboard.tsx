@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 
-import { isAlarmSoundEnabled, playAlarmSound, setAlarmSoundEnabled } from "@/lib/alarm-audio";
+import { isAlarmSoundEnabled, playAlarmSound, setAlarmSoundEnabled, stopAlarmSound } from "@/lib/alarm-audio";
 import { Button } from "@/components/ui/button";
 import {
   DashboardData,
@@ -99,7 +99,13 @@ export function MonitorDashboard({ data }: { data: DashboardData }) {
     previousProblemCountRef.current = problemCount;
   }, [problemCount, soundEnabled]);
 
-  const enableSound = async () => {
+  const toggleSound = async () => {
+    if (soundEnabled) {
+      setAlarmSoundEnabled(false);
+      setSoundEnabled(false);
+      await stopAlarmSound();
+      return;
+    }
     setAlarmSoundEnabled(true);
     setSoundEnabled(true);
     await playAlarmSound();
@@ -115,8 +121,8 @@ export function MonitorDashboard({ data }: { data: DashboardData }) {
           </p>
         </div>
         <div className="top-actions">
-          <button className={`sound-button ${soundEnabled ? "enabled" : ""}`} type="button" aria-pressed={soundEnabled} onClick={enableSound}>
-            {soundEnabled ? "🔊 声音已开启" : "🔇 开启告警声音"}
+          <button className={`sound-button ${soundEnabled ? "enabled" : ""}`} type="button" aria-pressed={soundEnabled} onClick={toggleSound}>
+            {soundEnabled ? "🔊 关闭告警声音" : "🔇 开启告警声音"}
           </button>
           <button className="sound-button test" type="button" onClick={playAlarmSound}>测试警报音</button>
           <a className="flow-screen-link" href="?screen=alerts">进入系统告警监控 →</a>
